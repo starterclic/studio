@@ -1,0 +1,94 @@
+---
+/**
+ * Input Component - Ultra Premium
+ *
+ * Form input with validation, icons, and premium styling
+ */
+
+interface Props {
+  id?: string;
+  name: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  icon?: string;
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+}
+
+const {
+  id,
+  name,
+  type = 'text',
+  label,
+  placeholder,
+  value,
+  required = false,
+  disabled = false,
+  error,
+  icon,
+  size = 'md',
+  fullWidth = true,
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'px-3 py-2 text-sm',
+  md: 'px-4 py-3 text-base',
+  lg: 'px-5 py-4 text-lg',
+};
+---
+
+<div class={`${fullWidth ? 'w-full' : ''}`}>
+  {label && (
+    <label
+      for={id || name}
+      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+    >
+      {label}
+      {required && <span class="text-red-500 ml-1">*</span>}
+    </label>
+  )}
+
+  <div class="relative">
+    {icon && (
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <span set:html={icon} />
+      </div>
+    )}
+
+    <input
+      id={id || name}
+      name={name}
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
+      class={`
+        w-full rounded-lg border
+        ${icon ? 'pl-10' : ''}
+        ${sizeClasses[size]}
+        ${error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+          : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500/20'
+        }
+        bg-white dark:bg-gray-800
+        text-gray-900 dark:text-white
+        placeholder-gray-400 dark:placeholder-gray-500
+        focus:outline-none focus:ring-4
+        transition-all duration-200
+        disabled:opacity-50 disabled:cursor-not-allowed
+      `.trim()}
+    />
+  </div>
+
+  {error && (
+    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+      {error}
+    </p>
+  )}
+</div>

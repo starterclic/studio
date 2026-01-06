@@ -1,0 +1,281 @@
+---
+/**
+ * Hero Component - Ultra Premium
+ *
+ * Premium hero section with advanced visual effects
+ * Supports gradient overlays, parallax, animated backgrounds, and CTAs
+ */
+
+interface Props {
+  id?: string;
+  className?: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  ctaPrimary?: { text: string; href: string };
+  ctaSecondary?: { text: string; href: string };
+  backgroundImage?: string;
+  backgroundVideo?: string;
+  overlay?: 'none' | 'light' | 'dark' | 'gradient';
+  align?: 'left' | 'center' | 'right';
+  height?: 'sm' | 'md' | 'lg' | 'xl' | 'screen';
+  pattern?: boolean;
+  animated?: boolean;
+}
+
+const {
+  id,
+  className = '',
+  title,
+  subtitle,
+  description,
+  ctaPrimary,
+  ctaSecondary,
+  backgroundImage,
+  backgroundVideo,
+  overlay = 'gradient',
+  align = 'center',
+  height = 'lg',
+  pattern = false,
+  animated = true,
+} = Astro.props;
+
+const heightClasses = {
+  sm: 'min-h-[400px]',
+  md: 'min-h-[500px]',
+  lg: 'min-h-[600px]',
+  xl: 'min-h-[700px]',
+  screen: 'min-h-screen',
+};
+
+const alignClasses = {
+  left: 'text-left items-start',
+  center: 'text-center items-center',
+  right: 'text-right items-end',
+};
+
+const overlayClasses = {
+  none: '',
+  light: 'bg-white/30',
+  dark: 'bg-black/50',
+  gradient: 'bg-gradient-to-br from-indigo-900/80 via-purple-900/70 to-pink-900/80',
+};
+---
+
+<section
+  id={id}
+  class={`
+    relative overflow-hidden
+    ${heightClasses[height]}
+    ${className}
+  `.trim()}
+>
+  <!-- Background Media -->
+  {backgroundVideo && (
+    <video
+      class="absolute inset-0 w-full h-full object-cover"
+      autoplay
+      muted
+      loop
+      playsinline
+    >
+      <source src={backgroundVideo} type="video/mp4" />
+    </video>
+  )}
+
+  {backgroundImage && !backgroundVideo && (
+    <div
+      class="absolute inset-0 w-full h-full bg-cover bg-center"
+      style={`background-image: url('${backgroundImage}');`}
+    />
+  )}
+
+  <!-- Animated Background Pattern -->
+  {pattern && (
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,black)]" />
+    </div>
+  )}
+
+  <!-- Overlay -->
+  {overlay !== 'none' && (
+    <div class={`absolute inset-0 ${overlayClasses[overlay]}`} />
+  )}
+
+  <!-- Content -->
+  <div class={`
+    relative z-10 h-full
+    flex flex-col justify-center
+    px-4 sm:px-6 lg:px-8
+    max-w-7xl mx-auto
+    ${alignClasses[align]}
+  `.trim()}>
+    <div class={`
+      max-w-4xl
+      ${animated ? 'animate-fade-in-up' : ''}
+    `.trim()}>
+      {subtitle && (
+        <p class="
+          text-sm font-semibold uppercase tracking-widest
+          text-indigo-300 mb-4
+          opacity-0 animate-fade-in
+          animation-delay-100
+        ">
+          {subtitle}
+        </p>
+      )}
+
+      <h1 class="
+        text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+        font-bold tracking-tight
+        text-white mb-6
+        opacity-0 animate-fade-in-up
+        animation-delay-200
+      ">
+        {title}
+      </h1>
+
+      {description && (
+        <p class="
+          text-lg sm:text-xl md:text-2xl
+          text-gray-200 mb-8 max-w-2xl
+          opacity-0 animate-fade-in-up
+          animation-delay-300
+        ">
+          {description}
+        </p>
+      )}
+
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="
+          flex flex-wrap gap-4
+          opacity-0 animate-fade-in-up
+          animation-delay-400
+        ">
+          {ctaPrimary && (
+            <a
+              href={ctaPrimary.href}
+              class="
+                px-8 py-4 rounded-xl
+                bg-white text-indigo-900
+                font-semibold text-lg
+                shadow-2xl shadow-indigo-500/50
+                hover:scale-105 hover:shadow-indigo-500/70
+                transition-all duration-300
+                inline-flex items-center gap-2
+              "
+            >
+              {ctaPrimary.text}
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          )}
+
+          {ctaSecondary && (
+            <a
+              href={ctaSecondary.href}
+              class="
+                px-8 py-4 rounded-xl
+                bg-white/10 backdrop-blur-sm text-white
+                font-semibold text-lg
+                border-2 border-white/30
+                hover:bg-white/20 hover:border-white/50
+                transition-all duration-300
+              "
+            >
+              {ctaSecondary.text}
+            </a>
+          )}
+        </div>
+      )}
+
+      <slot />
+    </div>
+  </div>
+
+  <!-- Decorative Elements -->
+  {animated && (
+    <>
+      <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+      <div class="absolute top-40 right-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+      <div class="absolute bottom-20 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+    </>
+  )}
+</section>
+
+<style>
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes blob {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  .bg-grid-white\/10 {
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 4rem 4rem;
+  }
+</style>

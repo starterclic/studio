@@ -1,0 +1,89 @@
+---
+/**
+ * Container Component - Ultra Premium
+ *
+ * Premium responsive container with fluid design system
+ * Supports advanced layout patterns and visual effects
+ */
+
+interface Props {
+  id?: string;
+  className?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  glassmorphism?: boolean;
+  gradient?: boolean;
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  border?: boolean;
+  centerContent?: boolean;
+}
+
+const {
+  id,
+  className = '',
+  size = 'lg',
+  padding = 'md',
+  glassmorphism = false,
+  gradient = false,
+  shadow = 'none',
+  rounded = 'none',
+  border = false,
+  centerContent = false,
+} = Astro.props;
+
+const sizeClasses = {
+  xs: 'max-w-screen-xs',
+  sm: 'max-w-screen-sm',
+  md: 'max-w-screen-md',
+  lg: 'max-w-screen-lg',
+  xl: 'max-w-screen-xl',
+  '2xl': 'max-w-screen-2xl',
+  full: 'max-w-full',
+};
+
+const paddingClasses = {
+  none: 'p-0',
+  sm: 'p-4',
+  md: 'p-6 lg:p-8',
+  lg: 'p-8 lg:p-12',
+  xl: 'p-12 lg:p-16',
+};
+
+const shadowClasses = {
+  none: '',
+  sm: 'shadow-sm',
+  md: 'shadow-md',
+  lg: 'shadow-lg',
+  xl: 'shadow-xl',
+  '2xl': 'shadow-2xl',
+};
+
+const roundedClasses = {
+  none: '',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+  full: 'rounded-full',
+};
+---
+
+<div
+  id={id}
+  class={`
+    mx-auto w-full
+    ${sizeClasses[size]}
+    ${paddingClasses[padding]}
+    ${shadowClasses[shadow]}
+    ${roundedClasses[rounded]}
+    ${glassmorphism ? 'backdrop-blur-xl bg-white/70 dark:bg-gray-900/70' : ''}
+    ${gradient ? 'bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' : ''}
+    ${border ? 'border border-gray-200 dark:border-gray-700' : ''}
+    ${centerContent ? 'flex items-center justify-center' : ''}
+    transition-all duration-300
+    ${className}
+  `.trim()}
+>
+  <slot />
+</div>

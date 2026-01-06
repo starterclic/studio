@@ -1,0 +1,107 @@
+---
+/**
+ * Card Component - Ultra Premium
+ *
+ * Versatile card component with hover effects and variants
+ * Supports images, icons, and complex layouts
+ */
+
+interface Props {
+  id?: string;
+  className?: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  href?: string;
+  variant?: 'default' | 'elevated' | 'outlined' | 'glass' | 'gradient';
+  hover?: 'lift' | 'glow' | 'scale' | 'tilt' | 'none';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  rounded?: 'sm' | 'md' | 'lg' | 'xl';
+}
+
+const {
+  id,
+  className = '',
+  title,
+  description,
+  image,
+  imageAlt,
+  href,
+  variant = 'default',
+  hover = 'lift',
+  padding = 'md',
+  rounded = 'lg',
+} = Astro.props;
+
+const variantClasses = {
+  default: 'bg-white dark:bg-gray-800 shadow-md',
+  elevated: 'bg-white dark:bg-gray-800 shadow-xl',
+  outlined: 'bg-transparent border-2 border-gray-200 dark:border-gray-700',
+  glass: 'bg-white/10 backdrop-blur-lg border border-white/20',
+  gradient: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white',
+};
+
+const hoverClasses = {
+  none: '',
+  lift: 'hover:-translate-y-2 hover:shadow-2xl',
+  glow: 'hover:shadow-2xl hover:shadow-indigo-500/50',
+  scale: 'hover:scale-105',
+  tilt: 'hover:rotate-1 hover:scale-105',
+};
+
+const paddingClasses = {
+  none: 'p-0',
+  sm: 'p-4',
+  md: 'p-6',
+  lg: 'p-8',
+};
+
+const roundedClasses = {
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+};
+
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  id={id}
+  href={href}
+  class={`
+    block overflow-hidden
+    ${variantClasses[variant]}
+    ${hoverClasses[hover]}
+    ${roundedClasses[rounded]}
+    transition-all duration-300 ease-out
+    ${className}
+  `.trim()}
+>
+  {image && (
+    <div class="aspect-video w-full overflow-hidden">
+      <img
+        src={image}
+        alt={imageAlt || title || ''}
+        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+      />
+    </div>
+  )}
+
+  <div class={paddingClasses[padding]}>
+    {title && (
+      <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+        {title}
+      </h3>
+    )}
+
+    {description && (
+      <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+        {description}
+      </p>
+    )}
+
+    <slot />
+  </div>
+</Tag>

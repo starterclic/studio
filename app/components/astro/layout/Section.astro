@@ -1,0 +1,73 @@
+---
+/**
+ * Section Component
+ *
+ * Full-width section container with customizable padding, background, and alignment
+ * Perfect for separating content areas on a page
+ */
+
+interface Props {
+  id?: string;
+  className?: string;
+  paddingY?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  background?: 'white' | 'gray' | 'dark' | 'primary' | 'transparent';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  textAlign?: 'left' | 'center' | 'right';
+}
+
+const {
+  id,
+  className = '',
+  paddingY = 'md',
+  background = 'white',
+  maxWidth = 'lg',
+  textAlign = 'left',
+} = Astro.props;
+
+const paddingClasses = {
+  none: 'py-0',
+  sm: 'py-8',
+  md: 'py-16',
+  lg: 'py-24',
+  xl: 'py-32',
+};
+
+const backgroundClasses = {
+  white: 'bg-white',
+  gray: 'bg-gray-50',
+  dark: 'bg-gray-900 text-white',
+  primary: 'bg-indigo-600 text-white',
+  transparent: 'bg-transparent',
+};
+
+const maxWidthClasses = {
+  sm: 'max-w-screen-sm',
+  md: 'max-w-screen-md',
+  lg: 'max-w-screen-lg',
+  xl: 'max-w-screen-xl',
+  full: 'max-w-full',
+};
+
+const textAlignClasses = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
+---
+
+<section
+  id={id}
+  class={`
+    ${paddingClasses[paddingY]}
+    ${backgroundClasses[background]}
+    ${className}
+  `.trim()}
+>
+  <div class={`
+    mx-auto px-4 sm:px-6 lg:px-8
+    ${maxWidthClasses[maxWidth]}
+    ${textAlignClasses[textAlign]}
+  `.trim()}>
+    <slot />
+  </div>
+</section>
