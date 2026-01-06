@@ -12,7 +12,18 @@ Da Vinci transforme le développement web en une expérience **visuelle, collabo
 
 ## ✨ Fonctionnalités Principales
 
-### 🚀 Phase 10 : WebContainer & Live Preview (Nouveau!)
+### 🤖 Phase 11.1 : AI Assistant Panel (Nouveau!)
+
+- **Chat AI intégré** - Panneau conversationnel avec Claude Sonnet 4
+- **Streaming en temps réel** - Réponses fluides et instantanées
+- **Code blocks interactifs** - Syntax highlighting + boutons Apply/Copy
+- **Context-aware** - Analyse de fichiers sélectionnés ou projet complet
+- **Modes spécialisés** - Explore, Generate, Debug, Refactor
+- **Quick actions** - Templates prédéfinis pour tâches courantes
+- **History persistée** - Conversations sauvegardées (derniers 50 messages)
+- **Markdown rendering** - Format professionnel des réponses
+
+### 🚀 Phase 10 : WebContainer & Live Preview
 
 - **Exécution de code dans le navigateur** - Node.js complet sans backend
 - **NPM dans le navigateur** - Installation de packages en temps réel
@@ -20,12 +31,13 @@ Da Vinci transforme le développement web en une expérience **visuelle, collabo
 - **Terminal intégré** - Xterm.js avec commandes complètes
 - **Hot reload** - Changements instantanés dans le preview
 
-### 💻 Workspace 4 Panels
+### 💻 Workspace 5 Panels
 
 - **📝 Content Panel** - Éditeur Markdown/MDX avec preview
 - **🎨 Design Panel** - Visual builder avec drag & drop
 - **💻 Code Panel** - Monaco Editor avec TypeScript IntelliSense
 - **🔮 Preview Panel** - Exécution live avec WebContainer
+- **🤖 AI Panel** - Assistant conversationnel Claude Sonnet 4
 
 ### 🎯 Fonctionnalités Avancées
 
@@ -136,16 +148,21 @@ davinci/
 │   │   │   │   ├── ContentPanel.tsx
 │   │   │   │   ├── DesignPanel.tsx
 │   │   │   │   ├── CodePanelOptimized.tsx
-│   │   │   │   └── PreviewPanel.tsx
+│   │   │   │   ├── PreviewPanel.tsx
+│   │   │   │   └── AIPanel.tsx (Nouveau!)
 │   │   │   ├── WorkspaceLayout.tsx
 │   │   │   ├── WorkspaceToolbar.tsx
 │   │   │   └── PanelResizer.tsx
+│   │   ├── ai/
+│   │   │   ├── ChatMessage.tsx (Nouveau!)
+│   │   │   └── CodeBlock.tsx (Nouveau!)
 │   │   └── terminal/
 │   │       └── Terminal.tsx
 │   ├── lib/
 │   │   ├── hooks/
 │   │   │   ├── useMonaco.ts
-│   │   │   └── useKeyboardShortcuts.ts
+│   │   │   ├── useKeyboardShortcuts.ts
+│   │   │   └── useAIChat.ts (Nouveau!)
 │   │   ├── services/
 │   │   │   ├── filesystem.ts (400+ lignes)
 │   │   │   ├── webcontainer.client.ts (500+ lignes)

@@ -9,6 +9,7 @@ import { ContentPanel } from './panels/ContentPanel';
 import { DesignPanel } from './panels/DesignPanel';
 import { CodePanelOptimized } from './panels/CodePanelOptimized';
 import { PreviewPanel } from './panels/PreviewPanel';
+import { AIPanel } from './panels/AIPanel';
 import { WorkspaceToolbar } from './WorkspaceToolbar';
 import { PanelResizer } from './PanelResizer';
 import { useKeyboardShortcuts } from '~/lib/hooks/useKeyboardShortcuts';
@@ -42,6 +43,7 @@ export function WorkspaceLayout() {
       design: DesignPanel,
       code: CodePanelOptimized,
       preview: PreviewPanel,
+      ai: AIPanel,
     };
 
     const PanelComponent = panelComponents[panelId as keyof typeof panelComponents];

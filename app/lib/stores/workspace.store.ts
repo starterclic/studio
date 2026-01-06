@@ -12,7 +12,19 @@ import { persist } from 'zustand/middleware';
 // Types
 // ============================================================================
 
-export type PanelType = 'content' | 'design' | 'code' | 'preview';
+export type PanelType = 'content' | 'design' | 'code' | 'preview' | 'ai';
+
+export interface AIMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+  codeBlocks?: {
+    language: string;
+    code: string;
+    filename?: string;
+  }[];
+}
 
 export interface WorkspacePanel {
   id: PanelType;
@@ -59,6 +71,15 @@ export interface WorkspaceState {
     wordWrap: boolean;
   };
 
+  // AI Panel State
+  aiAssistant: {
+    messages: AIMessage[];
+    isTyping: boolean;
+    selectedFiles: string[];
+    contextMode: 'full' | 'selected' | 'none';
+    model: string;
+  };
+
   // Actions
   setLayout: (layout: Partial<WorkspaceLayout>) => void;
   togglePanel: (panelId: PanelType) => void;
@@ -79,6 +100,14 @@ export interface WorkspaceState {
   setCodeTheme: (theme: 'vs-dark' | 'vs-light') => void;
   setCodeFontSize: (size: number) => void;
   toggleWordWrap: () => void;
+
+  // AI Panel Actions
+  addAIMessage: (message: AIMessage) => void;
+  setAITyping: (isTyping: boolean) => void;
+  setAISelectedFiles: (files: string[]) => void;
+  setAIContextMode: (mode: 'full' | 'selected' | 'none') => void;
+  setAIModel: (model: string) => void;
+  clearAIMessages: () => void;
 
   // Workspace Actions
   resetWorkspace: () => void;
@@ -122,6 +151,14 @@ const defaultPanels: Record<PanelType, WorkspacePanel> = {
     order: 4,
     width: 25,
   },
+  ai: {
+    id: 'ai',
+    title: 'AI Assistant',
+    icon: '🤖',
+    visible: false,
+    order: 5,
+    width: 25,
+  },
 };
 
 const defaultLayout: WorkspaceLayout = {
@@ -159,6 +196,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         theme: 'vs-dark',
         fontSize: 14,
         wordWrap: true,
+      },
+
+      aiAssistant: {
+        messages: [],
+        isTyping: false,
+        selectedFiles: [],
+        contextMode: 'selected',
+        model: 'claude-sonnet-4',
       },
 
       // Layout Actions
@@ -260,6 +305,40 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           },
         })),
 
+      // AI Panel Actions
+      addAIMessage: (message) =>
+        set((state) => ({
+          aiAssistant: {
+            ...state.aiAssistant,
+            messages: [...state.aiAssistant.messages, message],
+          },
+        })),
+
+      setAITyping: (isTyping) =>
+        set((state) => ({
+          aiAssistant: { ...state.aiAssistant, isTyping },
+        })),
+
+      setAISelectedFiles: (files) =>
+        set((state) => ({
+          aiAssistant: { ...state.aiAssistant, selectedFiles: files },
+        })),
+
+      setAIContextMode: (mode) =>
+        set((state) => ({
+          aiAssistant: { ...state.aiAssistant, contextMode: mode },
+        })),
+
+      setAIModel: (model) =>
+        set((state) => ({
+          aiAssistant: { ...state.aiAssistant, model },
+        })),
+
+      clearAIMessages: () =>
+        set((state) => ({
+          aiAssistant: { ...state.aiAssistant, messages: [] },
+        })),
+
       // Workspace Actions
       resetWorkspace: () =>
         set({
@@ -337,6 +416,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         designEditor: {
           zoom: state.designEditor.zoom,
           gridVisible: state.designEditor.gridVisible,
+        },
+        aiAssistant: {
+          messages: state.aiAssistant.messages.slice(-50), // Keep last 50 messages
+          contextMode: state.aiAssistant.contextMode,
+          model: state.aiAssistant.model,
         },
       }),
     }
