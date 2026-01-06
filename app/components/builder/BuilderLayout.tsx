@@ -10,7 +10,7 @@ import { useBuilderStore } from '~/lib/stores/builder.store';
 import { BuilderToolbar } from './BuilderToolbar';
 import { ComponentPalette } from './ComponentPalette';
 import { BuilderCanvas } from './BuilderCanvas';
-import { PropsInspector } from './PropsInspector';
+import { BuilderRightPanel } from './BuilderRightPanel';
 
 interface BuilderLayoutProps {
   pageId: string;
@@ -128,8 +128,8 @@ export function BuilderLayout({ pageId, pagePath, initialComponents = [] }: Buil
         {/* Center: Canvas */}
         <BuilderCanvas />
 
-        {/* Right: Props Inspector */}
-        <PropsInspector />
+        {/* Right: Tabbed Panel (Inspector + Preview) */}
+        <BuilderRightPanel />
       </div>
 
       {/* Keyboard Shortcuts Help (Bottom Toast) */}

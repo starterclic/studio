@@ -44,6 +44,11 @@ interface HistoryEntry {
 export type ViewportMode = 'desktop' | 'tablet' | 'mobile';
 
 /**
+ * Right panel tab
+ */
+export type RightPanelTab = 'inspector' | 'preview';
+
+/**
  * Panel visibility state
  */
 interface PanelState {
@@ -78,6 +83,7 @@ interface BuilderState {
   viewportMode: ViewportMode;
   zoom: number; // 25-200%
   panelState: PanelState;
+  activeRightPanel: RightPanelTab; // Active tab in right panel
   isDragging: boolean; // Drag & drop in progress
   draggedId: string | null; // ID of dragged component
 
@@ -113,6 +119,7 @@ interface BuilderState {
   setViewportMode: (mode: ViewportMode) => void;
   setZoom: (zoom: number) => void;
   togglePanel: (panel: keyof PanelState) => void;
+  setActiveRightPanel: (tab: RightPanelTab) => void;
   setDragging: (isDragging: boolean, draggedId?: string) => void;
 
   // Utility
@@ -147,6 +154,7 @@ const initialState = {
     inspector: true,
     layers: true,
   },
+  activeRightPanel: 'inspector' as RightPanelTab,
   isDragging: false,
   draggedId: null,
 };
@@ -458,6 +466,12 @@ export const useBuilderStore = create<BuilderState>()(
       togglePanel: (panel) => {
         set((state) => {
           state.panelState[panel] = !state.panelState[panel];
+        });
+      },
+
+      setActiveRightPanel: (tab) => {
+        set((state) => {
+          state.activeRightPanel = tab;
         });
       },
 

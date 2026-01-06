@@ -12,6 +12,7 @@ export function BuilderToolbar() {
     zoom,
     setViewportMode,
     setZoom,
+    setActiveRightPanel,
     undo,
     redo,
     save,
@@ -230,8 +231,9 @@ export function BuilderToolbar() {
 
         {/* Preview */}
         <button
+          onClick={() => setActiveRightPanel('preview')}
           className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 flex items-center gap-2"
-          title="Preview Mode"
+          title="Preview Mode - Switch to preview tab"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
