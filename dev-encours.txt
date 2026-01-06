@@ -1,0 +1,260 @@
+# 🎨 Da Vinci - État du Développement
+## Dernière mise à jour : 2026-01-06
+## 🌐 Production : https://studio.cybtek.fr
+
+═══════════════════════════════════════════════════════════════════
+
+## ✅ PHASES COMPLÉTÉES
+
+### Phase 1 : Configuration Base de Données ✅
+- Prisma ORM configuré avec PostgreSQL
+- Schéma complet (User, Organization, Project, Deployment)
+- Connexion à privacy_postgres validée
+
+### Phase 2 : Intégration Prisma + Remix ✅
+- Routes API CRUD complètes :
+  - /api/users (GET, POST, PATCH, DELETE)
+  - /api/organizations (GET, POST, PATCH, DELETE)
+  - /api/projects (GET, POST, PATCH, DELETE)
+- Gestion des relations et validations
+- Client Prisma intégré
+
+### Phase 3 : Branding Da Vinci ✅
+- Logo et couleurs Da Vinci (#1488fc)
+- Page d'accueil personnalisée
+- Header customisé avec navigation
+- Thème cohérent dans toute l'app
+
+### Phase 4 : Intégration Coolify API ✅
+- Client TypeScript Coolify (app/lib/services/coolify.server.ts)
+- Routes API déploiements :
+  - GET /api/deployments
+  - POST /api/deployments
+  - GET /api/deployments/:id
+  - POST /api/deployments/:id/restart
+  - PATCH /api/deployments/:id
+  - DELETE /api/deployments/:id
+- Schéma Prisma mis à jour (coolifyAppUuid, coolifyDeploymentUuid)
+
+### Phase 5 : Interface UI Déploiements ✅
+- Page liste des déploiements (/deployments)
+- Page détail déploiement avec logs (/deployments/:id)
+- Modal de création de déploiement
+- Actions : Deploy, Restart, Cancel, Delete
+- Auto-refresh pour builds actifs
+- Filtres par projet et statut
+- Statistiques de déploiements
+
+### Phase 6 : Webhooks Coolify ✅
+- Endpoint webhook /api/webhooks/coolify
+- Traitement événements temps réel (started, success, failed)
+- Vérification signature HMAC SHA-256
+- Système de notifications
+- Mise à jour automatique statuts de déploiement
+- Script de test automatisé
+
+### Phase 7 : Authentification Authentik/SSO ✅
+- Service OAuth2/OIDC complet avec PKCE
+- Routes auth (login, callback, logout, me)
+- Middleware protection routes + RBAC
+- Session management sécurisé (cookies HTTP-only)
+- Synchronisation users avec BDD
+- UI login moderne et responsive
+- Refresh automatique des tokens
+- Support 3 rôles (ADMIN, DEVELOPER, VIEWER)
+
+### Phase 8 : Workspace Panels ✅
+- Système 3 panels dynamiques (Content/Design/Code)
+- Store Zustand avec persistence localStorage
+- Layout flexible (single, split, triple)
+- Panels redimensionnables avec drag handles
+- Content Panel : Markdown editor + preview
+- Design Panel : Visual builder + properties
+- Code Panel : Monaco-ready + terminal
+- Presets rapides et raccourcis clavier
+
+### Phase 9 : Advanced Integrations ⏳ (EN COURS!)
+- ✅ Monaco Editor hook avec lazy loading
+- ✅ Virtual File System (400+ lignes)
+- ✅ Keyboard shortcuts système (30+ raccourcis)
+- ✅ File operations API (GET/POST/PATCH/DELETE)
+- ⏳ Code Panel optimisé avec Monaco
+- ⏳ WebContainer integration (à venir)
+- ✅ Configuration production studio.cybtek.fr
+
+═══════════════════════════════════════════════════════════════════
+
+## 🔧 CONFIGURATION COOLIFY
+
+### ✅ Token API Créé
+```env
+COOLIFY_API_TOKEN=5|lMbaELI0hvmy3Use9rDTTUNhENbWOMtef77ud6Ks6ba2f42f
+```
+
+### ✅ UUIDs Configurés
+```env
+COOLIFY_API_URL=https://devops.cybtek.fr
+COOLIFY_SERVER_UUID=n80g0ow08408woo4gcogcs8c (Devops)
+COOLIFY_DESTINATION_UUID=qcs08o848c8owgog84wsscws (coolify network)
+COOLIFY_PROJECT_UUID=default
+```
+
+### ✅ Production Configuration
+```env
+PRODUCTION_URL=https://studio.cybtek.fr
+AUTHENTIK_REDIRECT_URI=https://studio.cybtek.fr/api/auth/callback
+NODE_ENV=production
+PORT=3000
+```
+- DNS configuré dans Cloudflare ✅
+- Guide déploiement : PRODUCTION.md ✅
+
+### ✅ Tests API Réussis
+- ✅ Health check : OK
+- ✅ Version : 4.0.0-beta.460
+- ✅ Serveur accessible et opérationnel
+- ✅ Permissions token validées
+
+═══════════════════════════════════════════════════════════════════
+
+## 📊 COMMITS RÉALISÉS
+
+```
+40142d8 feat: Add Deployment Management UI (Phase 4)
+94ef8f0 feat: Add Coolify API integration for deployments
+da590bd feat: customize Bolt UI to Da Vinci branding (Phase 1)
+79b3c20 feat: integrate Prisma ORM with Remix API routes
+16b0c99 feat: configure Prisma ORM and PostgreSQL database
+1d24878 chore: initial Da Vinci fork cleanup
+```
+
+═══════════════════════════════════════════════════════════════════
+
+## 🎯 PROCHAINES PHASES
+
+### Phase 10 : WebContainer Integration
+- Exécution code dans le navigateur
+- Preview temps réel applications
+- Terminal interactif
+- NPM packages installation
+
+### Phase 11 : AI Magic Wand
+- Claude 3.5 Sonnet integration
+- Code generation depuis prompts
+- Debug automatique
+- Suggestions intelligentes
+
+### Phase 12 : Collaboration temps réel
+- WebSocket synchronization
+- Curseurs multi-utilisateurs
+- Chat intégré
+- Présence indicators
+
+═══════════════════════════════════════════════════════════════════
+
+## 📁 STRUCTURE DES FICHIERS
+
+```
+/opt/davinci/
+├── app/
+│   ├── components/
+│   │   └── DeploymentModal.tsx       (Nouveau!)
+│   ├── lib/
+│   │   └── services/
+│   │       └── coolify.server.ts     (Client API)
+│   ├── routes/
+│   │   ├── api.deployments.ts        (CRUD API)
+│   │   ├── api.deployments.$id.ts    (Detail API)
+│   │   ├── api.deployments.$id.restart.ts
+│   │   ├── api.projects.ts           (Projects CRUD)
+│   │   ├── api.organizations.ts      (Orgs CRUD)
+│   │   ├── api.users.ts              (Users CRUD)
+│   │   ├── deployments.tsx           (UI List) ← Nouveau!
+│   │   ├── deployments.$id.tsx       (UI Detail) ← Nouveau!
+│   │   └── _index.tsx                (Homepage)
+│   └── utils/
+│       └── db.server.ts              (Prisma client)
+├── prisma/
+│   └── schema.prisma                 (Database schema)
+└── .env.local                        (Config + Coolify tokens)
+```
+
+═══════════════════════════════════════════════════════════════════
+
+## 🚀 COMMENT UTILISER
+
+### 1. Démarrer l'application
+```bash
+cd /opt/davinci
+npm run dev
+```
+
+### 2. Accéder à l'application
+
+**Développement**:
+```
+http://localhost:5173
+```
+
+**Production**:
+```
+https://studio.cybtek.fr
+https://studio.cybtek.fr/deployments
+https://studio.cybtek.fr/workspace
+```
+
+### 3. Créer un nouveau déploiement
+1. Cliquer sur "New Deployment"
+2. Sélectionner un projet
+3. Choisir la branche Git
+4. Cliquer sur "Deploy Now"
+
+### 4. Voir les logs en temps réel
+1. Cliquer sur un déploiement dans la liste
+2. Les logs s'affichent en temps réel pendant le build
+3. Auto-refresh toutes les 3 secondes pour les builds actifs
+
+═══════════════════════════════════════════════════════════════════
+
+## ⚠️ IMPORTANT - PROCHAINES ACTIONS
+
+### Configuration à compléter :
+1. ❌ Ajouter clé API Anthropic dans .env.local
+   ```env
+   ANTHROPIC_API_KEY=sk-ant-api03-...
+   ```
+
+2. ✅ Token Coolify configuré (Fait!)
+
+3. ⏳ Migrer la base de données Prisma
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
+
+4. ⏳ Configurer Authentik SSO (Phase 7)
+
+═══════════════════════════════════════════════════════════════════
+
+## 🎉 RÉSUMÉ DES RÉALISATIONS
+
+✅ 6 commits effectués
+✅ 5 phases complétées
+✅ 15+ routes API créées
+✅ Interface UI complète pour déploiements
+✅ Intégration Coolify opérationnelle
+✅ Base de données Prisma configurée
+✅ Branding Da Vinci appliqué
+
+**Le système de déploiement est maintenant fonctionnel !** 🚀
+
+═══════════════════════════════════════════════════════════════════
+
+## 📞 SUPPORT
+
+Pour toute question ou assistance :
+- Documentation Coolify : docs/COOLIFY_SETUP.md
+- Coolify Dashboard : https://devops.cybtek.fr
+- Serveur : Devops (45.149.207.224)
+
+═══════════════════════════════════════════════════════════════════

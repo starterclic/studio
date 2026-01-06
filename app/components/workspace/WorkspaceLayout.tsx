@@ -7,12 +7,27 @@
 import { useWorkspaceStore } from '~/lib/stores/workspace.store';
 import { ContentPanel } from './panels/ContentPanel';
 import { DesignPanel } from './panels/DesignPanel';
-import { CodePanel } from './panels/CodePanel';
+import { CodePanelOptimized } from './panels/CodePanelOptimized';
 import { WorkspaceToolbar } from './WorkspaceToolbar';
 import { PanelResizer } from './PanelResizer';
+import { useKeyboardShortcuts } from '~/lib/hooks/useKeyboardShortcuts';
+import { initializeDefaultProject } from '~/lib/services/filesystem';
+import { useEffect } from 'react';
 
 export function WorkspaceLayout() {
   const { layout, panels, activePanel } = useWorkspaceStore();
+
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
+
+  // Initialize default project on first load
+  useEffect(() => {
+    const hasInitialized = localStorage.getItem('davinci-initialized');
+    if (!hasInitialized) {
+      initializeDefaultProject();
+      localStorage.setItem('davinci-initialized', 'true');
+    }
+  }, []);
 
   // Get visible panels in order
   const visiblePanels = Object.values(panels)
@@ -24,7 +39,7 @@ export function WorkspaceLayout() {
     const panelComponents = {
       content: ContentPanel,
       design: DesignPanel,
-      code: CodePanel,
+      code: CodePanelOptimized,
     };
 
     const PanelComponent = panelComponents[panelId as keyof typeof panelComponents];
