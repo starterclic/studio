@@ -12,7 +12,7 @@ import { persist } from 'zustand/middleware';
 // Types
 // ============================================================================
 
-export type PanelType = 'content' | 'design' | 'code';
+export type PanelType = 'content' | 'design' | 'code' | 'preview';
 
 export interface WorkspacePanel {
   id: PanelType;
@@ -96,7 +96,7 @@ const defaultPanels: Record<PanelType, WorkspacePanel> = {
     icon: '📝',
     visible: true,
     order: 1,
-    width: 33,
+    width: 25,
   },
   design: {
     id: 'design',
@@ -104,7 +104,7 @@ const defaultPanels: Record<PanelType, WorkspacePanel> = {
     icon: '🎨',
     visible: true,
     order: 2,
-    width: 34,
+    width: 25,
   },
   code: {
     id: 'code',
@@ -112,14 +112,22 @@ const defaultPanels: Record<PanelType, WorkspacePanel> = {
     icon: '💻',
     visible: true,
     order: 3,
-    width: 33,
+    width: 25,
+  },
+  preview: {
+    id: 'preview',
+    title: 'Preview',
+    icon: '🔮',
+    visible: true,
+    order: 4,
+    width: 25,
   },
 };
 
 const defaultLayout: WorkspaceLayout = {
   mode: 'triple',
   orientation: 'horizontal',
-  activePanels: ['content', 'design', 'code'],
+  activePanels: ['content', 'design', 'code', 'preview'],
 };
 
 // ============================================================================

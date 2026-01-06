@@ -8,6 +8,7 @@ import { useWorkspaceStore } from '~/lib/stores/workspace.store';
 import { ContentPanel } from './panels/ContentPanel';
 import { DesignPanel } from './panels/DesignPanel';
 import { CodePanelOptimized } from './panels/CodePanelOptimized';
+import { PreviewPanel } from './panels/PreviewPanel';
 import { WorkspaceToolbar } from './WorkspaceToolbar';
 import { PanelResizer } from './PanelResizer';
 import { useKeyboardShortcuts } from '~/lib/hooks/useKeyboardShortcuts';
@@ -40,6 +41,7 @@ export function WorkspaceLayout() {
       content: ContentPanel,
       design: DesignPanel,
       code: CodePanelOptimized,
+      preview: PreviewPanel,
     };
 
     const PanelComponent = panelComponents[panelId as keyof typeof panelComponents];
