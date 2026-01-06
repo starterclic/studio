@@ -23,10 +23,15 @@ model Organization {
   customDomain      String?  @unique // ex: "studio.mon-agence.com"
 
   // Subscription & Limits
-  plan              String   @default("free") // free, starter, pro, enterprise
+  tier              AgencyTier @default(STARTER)
+  plan              String   @default("free") // free, starter, pro, enterprise (legacy)
   maxProjects       Int      @default(3)
   maxUsers          Int      @default(5)
   maxStorageGB      Int      @default(5)
+  maxClientsPerProject Int   @default(10)
+
+  // Features enabled for this agency
+  featuresEnabled   Json?    // { visualBuilder: true, aiAssistant: true, whiteLabel: false }
 
   // Metadata
   createdAt DateTime @default(now())
@@ -35,8 +40,18 @@ model Organization {
   // Relations
   users    User[]
   projects Project[]
+  clients  Client[]
+  templates ComponentTemplate[]
+  assets   Asset[]
 
   @@index([slug])
+  @@index([tier])
+}
+
+enum AgencyTier {
+  STARTER       // 5 projets, 5 users, 10 GB
+  PRO           // 25 projets, 25 users, 100 GB, white-label
+  ENTERPRISE    // Illimité, support prioritaire, infra dédiée
 }
 
 // ==============================================================================
@@ -73,6 +88,36 @@ enum UserRole {
   AGENCY_ADMIN     // Owner de l'agence (accès complet)
   AGENCY_DEVELOPER // Développeur de l'agence (mode Code activé)
   CLIENT_EDITOR    // Client final (mode Content/Design uniquement)
+}
+
+// ==============================================================================
+// CLIENTS (Clients des agences)
+// ==============================================================================
+model Client {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  company     String?
+  phone       String?
+  avatarUrl   String?
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Associated user account (optional - client peut ne pas avoir de compte)
+  userId      String?  @unique
+
+  // Projects this client has access to
+  projectIds  String[] // Array of project IDs
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastAccessAt DateTime?
+
+  @@index([organizationId])
+  @@index([email])
 }
 
 // ==============================================================================
@@ -122,6 +167,10 @@ model Project {
 
   deployments Deployment[]
   files       File[]
+  pages       Page[]
+  customComponents CustomComponent[]
+  builderStates BuilderState[]
+  analytics    Analytics[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -167,6 +216,285 @@ model File {
 }
 
 // ==============================================================================
+// PAGES (Visual Builder)
+// ==============================================================================
+model Page {
+  id          String   @id @default(uuid())
+
+  // Page Info
+  title       String
+  slug        String   // ex: "/", "/about", "/contact"
+  path        String   // Full path in filesystem
+
+  // Page Type
+  type        PageType @default(STANDARD)
+
+  // Builder Content (JSON structure of components)
+  content     Json?    // { components: [...], layout: {...}, settings: {...} }
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+
+  // Settings
+  isPublished Boolean @default(false)
+  isDraft     Boolean @default(true)
+
+  // Relations
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Version History
+  currentVersion Int @default(1)
+  versions       PageVersion[]
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+  createdBy   String   // User ID
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([type])
+  @@index([isPublished])
+}
+
+enum PageType {
+  STANDARD      // Page standard
+  HOME          // Page d'accueil
+  BLOG_POST     // Article de blog
+  PRODUCT       // Page produit
+  LANDING       // Landing page
+  CUSTOM        // Type personnalisé
+}
+
+// ==============================================================================
+// PAGE VERSIONS (Historique et rollback)
+// ==============================================================================
+model PageVersion {
+  id          String   @id @default(uuid())
+
+  pageId      String
+  page        Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  version     Int      // Version number (1, 2, 3...)
+  content     Json     // Snapshot of page content
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  createdBy   String   // User ID
+  comment     String?  // Optional commit message
+
+  @@unique([pageId, version])
+  @@index([pageId])
+  @@index([createdAt])
+}
+
+// ==============================================================================
+// COMPONENT TEMPLATES (Library de composants)
+// ==============================================================================
+model ComponentTemplate {
+  id          String   @id @default(uuid())
+
+  // Component Info
+  name        String
+  slug        String
+  description String?
+  category    ComponentCategory @default(CONTENT)
+
+  // Component Code
+  astroCode   String   @db.Text // Astro component source code
+  propsSchema Json?    // JSON Schema for props validation
+
+  // Preview
+  thumbnail   String?
+  previewUrl  String?
+
+  // Availability
+  isGlobal    Boolean @default(true)  // Available to all agencies
+  isPremium   Boolean @default(false) // Requires PRO/ENTERPRISE tier
+
+  // Relations
+  organizationId String? // Null if global, agency ID if custom
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Usage stats
+  usageCount  Int @default(0)
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  version     String @default("1.0.0")
+
+  @@unique([slug, organizationId])
+  @@index([category])
+  @@index([isGlobal])
+  @@index([isPremium])
+}
+
+enum ComponentCategory {
+  LAYOUT        // Sections, Containers, Grid
+  NAVIGATION    // Header, Footer, Menu, Breadcrumbs
+  CONTENT       // Text, Image, Video, Gallery
+  FORMS         // Input, Button, Form, Checkbox
+  DATA          // Table, Chart, List
+  INTERACTIVE   // Accordion, Tabs, Modal, Carousel
+  ECOMMERCE     // Product, Cart, Checkout
+  CUSTOM        // User-created
+}
+
+// ==============================================================================
+// CUSTOM COMPONENTS (Composants créés par les utilisateurs)
+// ==============================================================================
+model CustomComponent {
+  id          String   @id @default(uuid())
+
+  // Component Info
+  name        String
+  slug        String
+  description String?
+
+  // Component Code
+  astroCode   String   @db.Text
+  cssCode     String?  @db.Text
+  jsCode      String?  @db.Text
+  propsSchema Json?
+
+  // Relations
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // User ID
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+}
+
+// ==============================================================================
+// ASSETS (Media Library)
+// ==============================================================================
+model Asset {
+  id          String   @id @default(uuid())
+
+  // File Info
+  filename    String
+  path        String   // Storage path (S3, local, etc.)
+  url         String   // Public URL
+  mimeType    String
+  size        Int      // Size in bytes
+
+  // Asset Type
+  type        AssetType
+
+  // Image-specific metadata
+  width       Int?
+  height      Int?
+  altText     String?
+
+  // Organization
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  uploadedBy  String   // User ID
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  FONT
+  OTHER
+}
+
+// ==============================================================================
+// ANALYTICS (Métriques et statistiques)
+// ==============================================================================
+model Analytics {
+  id          String   @id @default(uuid())
+
+  // Relations
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Metrics
+  pageViews   Int @default(0)
+  uniqueVisitors Int @default(0)
+  avgLoadTime Float? // Average page load time in ms
+
+  // Traffic sources (JSON for flexibility)
+  trafficSources Json? // { direct: 40, organic: 30, social: 20, referral: 10 }
+
+  // Top pages
+  topPages    Json? // [{ path: "/", views: 1000 }, ...]
+
+  // Date range
+  date        DateTime // Date for this analytics snapshot
+  period      AnalyticsPeriod @default(DAY)
+
+  // Metadata
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, date, period])
+  @@index([projectId])
+  @@index([date])
+}
+
+enum AnalyticsPeriod {
+  HOUR
+  DAY
+  WEEK
+  MONTH
+}
+
+// ==============================================================================
+// BUILDER STATE (Sauvegarde état du visual builder)
+// ==============================================================================
+model BuilderState {
+  id          String   @id @default(uuid())
+
+  // Relations
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String   // User who owns this state
+
+  // State Data
+  selectedComponentId String?  // Currently selected component
+  zoom        Float @default(100) // Canvas zoom level
+  viewportMode String @default("desktop") // desktop, tablet, mobile
+
+  // Canvas position
+  scrollX     Int @default(0)
+  scrollY     Int @default(0)
+
+  // Panels visibility
+  panelsState Json? // { left: true, right: true, bottom: false }
+
+  // Clipboard (for copy/paste)
+  clipboard   Json?
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+// ==============================================================================
 // DÉPLOIEMENTS (Historique des builds)
 // ==============================================================================
 model Deployment {
@@ -186,7 +514,7 @@ model Deployment {
   buildNumber Int      @default(autoincrement()) // Numéro séquentiel du build
 
   // Status
-  status      DeploymentStatus @default(PENDING)
+  status      DeploymentStatus @default(pending)
   startedAt   DateTime?
   deployedAt  DateTime? // When successfully deployed
   finishedAt  DateTime?

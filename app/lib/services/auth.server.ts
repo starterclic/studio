@@ -36,6 +36,17 @@ export interface AuthUser {
   organizationId?: string;
 }
 
+/**
+ * User context for RBAC (Role-Based Access Control)
+ */
+export interface UserContext {
+  id: string;
+  email: string;
+  name: string;
+  role: import('@prisma/client').UserRole;
+  organizationId: string;
+}
+
 export interface TokenSet {
   access_token: string;
   refresh_token?: string;
@@ -321,10 +332,9 @@ export async function syncUserToDatabase(profile: any): Promise<AuthUser> {
     id: user.id,
     email: user.email,
     name: user.name,
-    username: user.username || undefined,
     avatar: user.avatarUrl || undefined,
     roles: [user.role],
-    organizationId: user.currentOrganizationId || undefined,
+    organizationId: user.organizationId,
   };
 }
 
@@ -407,11 +417,79 @@ export async function getAuthenticatedUser(request: Request): Promise<AuthUser |
     id: user.id,
     email: user.email,
     name: user.name,
-    username: user.username || undefined,
     avatar: user.avatarUrl || undefined,
     roles: [user.role],
-    organizationId: user.currentOrganizationId || undefined,
+    organizationId: user.organizationId,
   };
+}
+
+/**
+ * Get user context for RBAC (Role-Based Access Control)
+ * Returns a simplified UserContext with role for permission checking
+ */
+export async function getUserContext(request: Request): Promise<UserContext | null> {
+  const session = await getUserSession(request);
+  const userId = session.get('userId');
+
+  if (!userId) {
+    return null;
+  }
+
+  // Check if token is expired
+  const expiresAt = session.get('expiresAt');
+  if (expiresAt && Date.now() > expiresAt) {
+    // Try to refresh token
+    const refreshToken = session.get('refreshToken');
+    if (refreshToken) {
+      try {
+        const newTokens = await refreshAccessToken(refreshToken);
+        session.set('accessToken', newTokens.access_token);
+        session.set('expiresAt', newTokens.expires_at);
+      } catch (error) {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  // Fetch user from database with organization
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      organizationId: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    organizationId: user.organizationId,
+  };
+}
+
+/**
+ * Require authenticated user context for RBAC
+ * Throws error if not authenticated (for use in RBAC middleware)
+ */
+export async function requireUserContext(request: Request): Promise<UserContext> {
+  const user = await getUserContext(request);
+
+  if (!user) {
+    throw new Error('Unauthorized: User not authenticated');
+  }
+
+  return user;
 }
 
 /**
