@@ -414,9 +414,13 @@ export const ModelSelector = ({
     );
   }
 
+  // Da Vinci: Hide provider selector when there's only one provider (Anthropic)
+  const showProviderSelector = providerList.length > 1;
+
   return (
     <div className="flex gap-2 flex-col sm:flex-row">
-      {/* Provider Combobox */}
+      {/* Provider Combobox - Hidden in Da Vinci (only Anthropic/Claude) */}
+      {showProviderSelector && (
       <div className="relative flex w-full" onKeyDown={handleProviderKeyDown} ref={providerDropdownRef}>
         <div
           className={classNames(
@@ -571,9 +575,10 @@ export const ModelSelector = ({
           </div>
         )}
       </div>
+      )}
 
       {/* Model Combobox */}
-      <div className="relative flex w-full min-w-[70%]" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
+      <div className={`relative flex w-full ${showProviderSelector ? 'min-w-[70%]' : ''}`} onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
         <div
           className={classNames(
             'w-full p-2 rounded-lg border border-bolt-elements-borderColor',

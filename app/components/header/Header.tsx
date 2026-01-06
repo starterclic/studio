@@ -4,6 +4,7 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { TriStateSwitch } from '~/components/workspace/TriStateSwitch';
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -23,14 +24,15 @@ export function Header() {
           <img src="/logo-dark-styled.png" alt="logo" className="w-[90px] inline-block hidden dark:block" />
         </a>
       </div>
-      {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
+      {chat.started && ( // Display ChatDescription, TriStateSwitch and HeaderActionButtons only when the chat has started.
         <>
           <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
             <ClientOnly>{() => <ChatDescription />}</ClientOnly>
           </span>
           <ClientOnly>
             {() => (
-              <div className="">
+              <div className="flex items-center gap-3">
+                <TriStateSwitch userRole="AGENCY_DEVELOPER" />
                 <HeaderActionButtons chatStarted={chat.started} />
               </div>
             )}
