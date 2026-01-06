@@ -12,7 +12,18 @@ Da Vinci transforme le développement web en une expérience **visuelle, collabo
 
 ## ✨ Fonctionnalités Principales
 
-### 🤖 Phase 11.1 : AI Assistant Panel (Nouveau!)
+### 🤖 Phase 11.2 : AI Code Completion Inline (Nouveau!)
+
+- **Suggestions inline intelligentes** - Code completion powered by Claude Sonnet 4
+- **Ghost text en temps réel** - Aperçu des suggestions pendant la frappe
+- **Context-aware** - Analyse du code avant/après le curseur
+- **Multi-langages** - Support TS/JS/Python/Java/C++/Go/Rust et 20+ langages
+- **Debounced requests** - Optimisé pour éviter les appels API inutiles
+- **Raccourci Ctrl+Space** - Accepter la suggestion
+- **Escape pour rejeter** - Contrôle total sur les suggestions
+- **Intégration CodeMirror** - Extension native dans l'éditeur
+
+### 🤖 Phase 11.1 : AI Assistant Panel
 
 - **Chat AI intégré** - Panneau conversationnel avec Claude Sonnet 4
 - **Streaming en temps réel** - Réponses fluides et instantanées
@@ -154,8 +165,11 @@ davinci/
 │   │   │   ├── WorkspaceToolbar.tsx
 │   │   │   └── PanelResizer.tsx
 │   │   ├── ai/
-│   │   │   ├── ChatMessage.tsx (Nouveau!)
-│   │   │   └── CodeBlock.tsx (Nouveau!)
+│   │   │   ├── ChatMessage.tsx (Phase 11.1)
+│   │   │   └── CodeBlock.tsx (Phase 11.1)
+│   │   ├── editor/
+│   │   │   └── codemirror/
+│   │   │       └── ai-completion.ts (Phase 11.2 - Nouveau!)
 │   │   └── terminal/
 │   │       └── Terminal.tsx
 │   ├── lib/
@@ -180,6 +194,7 @@ davinci/
 │       ├── api.files.$path.ts
 │       ├── api.deployments.ts
 │       ├── api.webhooks.coolify.ts
+│       ├── api.ai.complete.ts (Phase 11.2 - Nouveau!)
 │       ├── workspace.tsx
 │       └── login.tsx
 ├── prisma/

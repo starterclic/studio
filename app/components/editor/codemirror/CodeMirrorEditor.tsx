@@ -27,11 +27,52 @@ import { getTheme, reconfigureTheme } from './cm-theme';
 import { indentKeyBinding } from './indent';
 import { getLanguage } from './languages';
 import { createEnvMaskingExtension } from './EnvMasking';
+import { aiCompletion } from './ai-completion';
 
 const logger = createScopedLogger('CodeMirrorEditor');
 
 // Create a module-level reference to the current document for use in tooltip functions
 let currentDocRef: EditorDocument | undefined;
+
+/**
+ * Get programming language from file path
+ */
+function getLanguageFromFilePath(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase() || '';
+
+  const languageMap: Record<string, string> = {
+    ts: 'typescript',
+    tsx: 'typescript',
+    js: 'javascript',
+    jsx: 'javascript',
+    py: 'python',
+    java: 'java',
+    cpp: 'cpp',
+    c: 'c',
+    cs: 'csharp',
+    go: 'go',
+    rs: 'rust',
+    rb: 'ruby',
+    php: 'php',
+    swift: 'swift',
+    kt: 'kotlin',
+    scala: 'scala',
+    html: 'html',
+    css: 'css',
+    scss: 'scss',
+    less: 'less',
+    json: 'json',
+    yaml: 'yaml',
+    yml: 'yaml',
+    xml: 'xml',
+    md: 'markdown',
+    sql: 'sql',
+    sh: 'shell',
+    bash: 'shell',
+  };
+
+  return languageMap[ext] || 'text';
+}
 
 export interface EditorDocument {
   value: string;
@@ -280,9 +321,18 @@ export const CodeMirrorEditor = memo(
       let state = editorStates.get(doc.filePath);
 
       if (!state) {
+        // Determine language from file extension
+        const language = getLanguageFromFilePath(doc.filePath);
+
         state = newEditorState(doc.value, theme, settings, onScrollRef, debounceScroll, onSaveRef, [
           languageCompartment.of([]),
           envMaskingCompartment.of([createEnvMaskingExtension(() => docRef.current?.filePath)]),
+          aiCompletion({
+            enabled: true, // AI completion enabled by default
+            filePath: doc.filePath,
+            language: language,
+            debounceMs: 800, // 800ms debounce for AI requests
+          }),
         ]);
 
         editorStates.set(doc.filePath, state);
