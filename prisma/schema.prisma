@@ -86,6 +86,7 @@ model Project {
   // Infrastructure Docker/Coolify
   containerDockerId     String?   // ID Docker du conteneur
   coolifyProjectId      String?   // ID dans Coolify
+  coolifyAppUuid        String?   @unique // UUID de l'application Coolify
   status                ProjectStatus @default(CREATING)
 
   // Domaines
@@ -93,8 +94,8 @@ model Project {
   customDomain String?  // ex: "www.monrestaurant.fr"
 
   // Git Repository
-  repoUrl     String?   // ex: "https://github.com/agence/mon-restaurant"
-  repoBranch  String    @default("main")
+  gitRepository String?   // ex: "https://github.com/agence/mon-restaurant"
+  gitBranch     String    @default("main")
   lastCommitHash String? // SHA du dernier commit
 
   // Template utilisé
@@ -146,35 +147,42 @@ model Deployment {
   projectId   String
   project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  // Coolify Integration
+  coolifyDeploymentUuid String? @unique // UUID du déploiement Coolify
+
   // Build Info
-  commitHash  String   // SHA du commit déployé
+  commitSha   String?  // SHA du commit déployé
   commitMessage String?
-  branch      String   @default("main")
-  buildNumber Int      // Numéro séquentiel du build
+  gitBranch   String   @default("main")
+  buildNumber Int      @default(autoincrement()) // Numéro séquentiel du build
 
   // Status
   status      DeploymentStatus @default(PENDING)
   startedAt   DateTime?
+  deployedAt  DateTime? // When successfully deployed
   finishedAt  DateTime?
   duration    Int?     // Durée en secondes
 
-  // Logs
+  // Logs & Errors
   buildLogs   String?  @db.Text  // Logs du build Docker
+  error       String?  @db.Text  // Error message if failed
 
   // Metadata
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([projectId])
   @@index([status])
   @@index([createdAt])
+  @@index([coolifyDeploymentUuid])
 }
 
 enum DeploymentStatus {
-  PENDING       // En attente dans la queue
-  BUILDING      // Build en cours
-  SUCCESS       // Déployé avec succès
-  FAILED        // Échec du déploiement
-  CANCELLED     // Annulé par l'utilisateur
+  pending       // En attente dans la queue
+  building      // Build en cours
+  deployed      // Déployé avec succès
+  failed        // Échec du déploiement
+  cancelled     // Annulé par l'utilisateur
 }
 
 // ==============================================================================
