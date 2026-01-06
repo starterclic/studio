@@ -1,0 +1,243 @@
+// Prisma Schema pour Da Vinci - Web-Autonomy Platform
+// Générateur et configuration
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================================================
+// ORGANISATIONS (Agences Web)
+// ==============================================================================
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique // ex: "mon-agence"
+
+  // White-Label Branding
+  brandingLogo      String?  // URL ou path du logo
+  brandingColors    Json?    // { primary: "#6366f1", secondary: "#8b5cf6" }
+  customDomain      String?  @unique // ex: "studio.mon-agence.com"
+
+  // Subscription & Limits
+  plan              String   @default("free") // free, starter, pro, enterprise
+  maxProjects       Int      @default(3)
+  maxUsers          Int      @default(5)
+  maxStorageGB      Int      @default(5)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users    User[]
+  projects Project[]
+
+  @@index([slug])
+}
+
+// ==============================================================================
+// UTILISATEURS
+// ==============================================================================
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String
+  role          UserRole @default(CLIENT_EDITOR)
+
+  // Authentik SSO
+  authentikId   String?  @unique  // ID externe depuis Authentik
+
+  // Avatar
+  avatarUrl     String?
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLoginAt DateTime?
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([authentikId])
+}
+
+enum UserRole {
+  SUPER_ADMIN      // Admin plateforme Da Vinci (niveau système)
+  AGENCY_ADMIN     // Owner de l'agence (accès complet)
+  AGENCY_DEVELOPER // Développeur de l'agence (mode Code activé)
+  CLIENT_EDITOR    // Client final (mode Content/Design uniquement)
+}
+
+// ==============================================================================
+// PROJETS (Sites clients)
+// ==============================================================================
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   // ex: "mon-restaurant"
+
+  // Infrastructure Docker/Coolify
+  containerDockerId     String?   // ID Docker du conteneur
+  coolifyProjectId      String?   // ID dans Coolify
+  status                ProjectStatus @default(CREATING)
+
+  // Domaines
+  subdomain   String    // ex: "mon-restaurant.agence.com"
+  customDomain String?  // ex: "www.monrestaurant.fr"
+
+  // Git Repository
+  repoUrl     String?   // ex: "https://github.com/agence/mon-restaurant"
+  repoBranch  String    @default("main")
+  lastCommitHash String? // SHA du dernier commit
+
+  // Template utilisé
+  templateId  String    // ex: "master-astro-v1"
+
+  // Métriques & Monitoring
+  resourceUsageMB  Int   @default(512)    // RAM utilisée
+  buildCount       Int   @default(0)      // Nombre de builds
+  lastBuildStatus  String @default("never") // success, failed, building
+  lastDeployedAt   DateTime?
+
+  // Preview URLs (pour branches de dev)
+  previewEnabled   Boolean @default(false)
+  previewUrl       String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  deployments Deployment[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([status])
+  @@index([coolifyProjectId])
+}
+
+enum ProjectStatus {
+  CREATING      // En cours de création (provisioning)
+  BUILDING      // Build Docker en cours
+  RUNNING       // Actif et accessible
+  STOPPED       // Arrêté (hibernation)
+  ERROR         // Erreur critique
+  DELETED       // Marqué pour suppression
+}
+
+// ==============================================================================
+// DÉPLOIEMENTS (Historique des builds)
+// ==============================================================================
+model Deployment {
+  id          String   @id @default(uuid())
+
+  // Relations
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Build Info
+  commitHash  String   // SHA du commit déployé
+  commitMessage String?
+  branch      String   @default("main")
+  buildNumber Int      // Numéro séquentiel du build
+
+  // Status
+  status      DeploymentStatus @default(PENDING)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  duration    Int?     // Durée en secondes
+
+  // Logs
+  buildLogs   String?  @db.Text  // Logs du build Docker
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum DeploymentStatus {
+  PENDING       // En attente dans la queue
+  BUILDING      // Build en cours
+  SUCCESS       // Déployé avec succès
+  FAILED        // Échec du déploiement
+  CANCELLED     // Annulé par l'utilisateur
+}
+
+// ==============================================================================
+// TEMPLATES (Master Themes)
+// ==============================================================================
+model Template {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique  // ex: "master-astro-restaurant"
+  description String?
+  thumbnail   String?  // URL de l'image de preview
+
+  // Git Source
+  sourceRepoUrl String  // ex: "https://github.com/davinci/master-astro"
+  sourceBranch  String  @default("main")
+
+  // Metadata
+  category     String   // "restaurant", "portfolio", "ecommerce", "saas"
+  tags         String[] // ["astro", "tailwind", "modern"]
+  version      String   @default("1.0.0")
+  isActive     Boolean  @default(true)
+  isPremium    Boolean  @default(false)
+
+  // Features
+  hasKeystatic Boolean  @default(true)
+  hasI18n      Boolean  @default(false)
+  hasEcommerce Boolean  @default(false)
+
+  // Usage Stats
+  usageCount   Int      @default(0) // Nombre de projets créés avec ce template
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+// ==============================================================================
+// ACTIVITÉS & LOGS (Audit Trail)
+// ==============================================================================
+model ActivityLog {
+  id          String   @id @default(uuid())
+
+  // Who
+  userId      String
+  userEmail   String
+
+  // What
+  action      String   // "project.created", "deployment.started", "user.invited"
+  entityType  String   // "project", "deployment", "user"
+  entityId    String
+  changes     Json?    // Avant/Après pour les modifications
+
+  // Context
+  ipAddress   String?
+  userAgent   String?
+
+  // When
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
