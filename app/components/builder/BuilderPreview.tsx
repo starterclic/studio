@@ -189,7 +189,7 @@ async function convertAstroToHtml(
 /**
  * Render a single component to HTML (simplified)
  */
-function renderComponentToHtml(component: any, depth = 0): string {
+function renderComponentToHtml(component: Record<string, any>, depth = 0): string {
   const { type, props, children } = component;
 
   // Map component types to HTML
@@ -214,7 +214,7 @@ function renderComponentToHtml(component: any, depth = 0): string {
 }
 
 // Component HTML renderers
-function renderSection(props: any, children: any[]) {
+function renderSection(props: Record<string, any>, children: Record<string, any>[]) {
   const childrenHtml = children.map((c) => renderComponentToHtml(c)).join('');
   return `<section class="py-16 ${props.background === 'dark' ? 'bg-gray-900 text-white' : props.background === 'gray' ? 'bg-gray-50' : 'bg-white'}">
     <div class="max-w-screen-${props.maxWidth || 'lg'} mx-auto px-4 ${props.textAlign === 'center' ? 'text-center' : ''}">
@@ -223,21 +223,21 @@ function renderSection(props: any, children: any[]) {
   </section>`;
 }
 
-function renderContainer(props: any, children: any[]) {
+function renderContainer(props: Record<string, any>, children: Record<string, any>[]) {
   const childrenHtml = children.map((c) => renderComponentToHtml(c)).join('');
   return `<div class="max-w-screen-${props.size || 'lg'} mx-auto p-${props.padding === 'lg' ? '12' : '6'} ${props.glassmorphism ? 'backdrop-blur-xl bg-white/70' : ''} ${props.rounded ? `rounded-${props.rounded}` : ''} ${props.shadow ? `shadow-${props.shadow}` : ''}">
     ${childrenHtml}
   </div>`;
 }
 
-function renderGrid(props: any, children: any[]) {
+function renderGrid(props: Record<string, any>, children: Record<string, any>[]) {
   const childrenHtml = children.map((c) => renderComponentToHtml(c)).join('');
   return `<div class="grid grid-cols-${props.cols || 1} gap-${props.gap === 'lg' ? '8' : '6'}">
     ${childrenHtml}
   </div>`;
 }
 
-function renderHero(props: any, children: any[]) {
+function renderHero(props: Record<string, any>, children: Record<string, any>[]) {
   return `<section class="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white overflow-hidden">
     ${props.pattern ? '<div class="absolute inset-0 opacity-10 bg-grid-white/10"></div>' : ''}
     <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
@@ -249,7 +249,7 @@ function renderHero(props: any, children: any[]) {
   </section>`;
 }
 
-function renderCard(props: any, children: any[]) {
+function renderCard(props: Record<string, any>, children: Record<string, any>[]) {
   return `<div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-${props.variant === 'elevated' ? 'xl' : 'md'} ${props.hover === 'lift' ? 'hover:-translate-y-2' : ''} transition-all">
     ${props.image ? `<img src="${props.image}" alt="${props.imageAlt || ''}" class="w-full aspect-video object-cover rounded-lg mb-4" />` : ''}
     ${props.title ? `<h3 class="text-xl font-bold mb-2">${props.title}</h3>` : ''}
@@ -257,14 +257,14 @@ function renderCard(props: any, children: any[]) {
   </div>`;
 }
 
-function renderButton(props: any, children: any[]) {
-  const variantClasses = {
+function renderButton(props: Record<string, any>, children: Record<string, any>[]) {
+  const variantClasses: Record<string, string> = {
     primary: 'bg-indigo-600 hover:bg-indigo-700 text-white',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900',
     outline: 'bg-transparent border-2 border-indigo-600 text-indigo-600',
     gradient: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white',
   };
-  const sizeClasses = {
+  const sizeClasses: Record<string, string> = {
     sm: 'px-4 py-2 text-sm',
     md: 'px-6 py-3 text-base',
     lg: 'px-8 py-4 text-lg',
@@ -272,7 +272,7 @@ function renderButton(props: any, children: any[]) {
   return `<button class="${variantClasses[props.variant || 'primary']} ${sizeClasses[props.size || 'md']} rounded-lg font-semibold transition-all hover:scale-105 shadow-lg">${children[0]?.props?.text || 'Button'}</button>`;
 }
 
-function renderInput(props: any, children: any[]) {
+function renderInput(props: Record<string, any>, children: Record<string, any>[]) {
   return `<div>
     ${props.label ? `<label class="block text-sm font-medium text-gray-700 mb-2">${props.label}${props.required ? '<span class="text-red-500 ml-1">*</span>' : ''}</label>` : ''}
     <input type="${props.type || 'text'}" placeholder="${props.placeholder || ''}" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all" />

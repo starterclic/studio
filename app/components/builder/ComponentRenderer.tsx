@@ -7,7 +7,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { type ComponentNode } from '~/lib/stores/builder.store';
+import { useBuilderStore, type ComponentNode } from '~/lib/stores/builder.store';
 import { DropZone } from './DropZone';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 

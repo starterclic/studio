@@ -158,7 +158,7 @@ function serializeProps(props: Record<string, any>): string {
  * Convert slug to PascalCase
  * hero-premium → HeroPremium
  */
-function slugToPascalCase(slug: string): string {
+export function slugToPascalCase(slug: string): string {
   return slug
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

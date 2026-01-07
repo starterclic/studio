@@ -188,7 +188,13 @@ function PropsForm({ schema, values, onChange }: PropsFormProps) {
 // Form Field (Based on JSON Schema type)
 // ============================================================================
 
-function FormField({ schema, value, onChange }: any) {
+interface FormFieldProps {
+  schema: any;
+  value: any;
+  onChange: (value: any) => void;
+}
+
+function FormField({ schema, value, onChange }: FormFieldProps) {
   // Enum (Select)
   if (schema.enum) {
     return (
