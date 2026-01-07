@@ -1,13 +1,14 @@
 services:
   app-prod:
     image: bolt-ai:production
+    container_name: davinci-studio
     build:
       context: .
       dockerfile: Dockerfile
       target: bolt-ai-production
-    ports:
-      - '5173:5173'
-    env_file: 
+    networks:
+      - traefik-public
+    env_file:
       - '.env'
       - '.env.local'
     environment:
@@ -29,6 +30,19 @@ services:
       - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-debug}
       - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.davinci-studio.rule=Host(`studio.cubtek.fr`)"
+      - "traefik.http.routers.davinci-studio.entrypoints=websecure"
+      - "traefik.http.routers.davinci-studio.tls=true"
+      - "traefik.http.routers.davinci-studio.tls.certresolver=letsencrypt"
+      - "traefik.http.services.davinci-studio.loadbalancer.server.port=5173"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.davinci-studio-http.rule=Host(`studio.cubtek.fr`)"
+      - "traefik.http.routers.davinci-studio-http.entrypoints=web"
+      - "traefik.http.routers.davinci-studio-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     command: pnpm run dockerstart
@@ -96,3 +110,7 @@ services:
     command: pnpm run dockerstart
     profiles:
       - prebuilt
+
+networks:
+  traefik-public:
+    external: true
