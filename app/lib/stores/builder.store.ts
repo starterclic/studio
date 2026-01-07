@@ -84,6 +84,7 @@ interface BuilderState {
   zoom: number; // 25-200%
   panelState: PanelState;
   activeRightPanel: RightPanelTab; // Active tab in right panel
+  isExportDialogOpen: boolean; // Export dialog visibility
   isDragging: boolean; // Drag & drop in progress
   draggedId: string | null; // ID of dragged component
 
@@ -120,6 +121,7 @@ interface BuilderState {
   setZoom: (zoom: number) => void;
   togglePanel: (panel: keyof PanelState) => void;
   setActiveRightPanel: (tab: RightPanelTab) => void;
+  setExportDialogOpen: (isOpen: boolean) => void;
   setDragging: (isDragging: boolean, draggedId?: string) => void;
 
   // Utility
@@ -155,6 +157,7 @@ const initialState = {
     layers: true,
   },
   activeRightPanel: 'inspector' as RightPanelTab,
+  isExportDialogOpen: false,
   isDragging: false,
   draggedId: null,
 };
@@ -472,6 +475,12 @@ export const useBuilderStore = create<BuilderState>()(
       setActiveRightPanel: (tab) => {
         set((state) => {
           state.activeRightPanel = tab;
+        });
+      },
+
+      setExportDialogOpen: (isOpen) => {
+        set((state) => {
+          state.isExportDialogOpen = isOpen;
         });
       },
 

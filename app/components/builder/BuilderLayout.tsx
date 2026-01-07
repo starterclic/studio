@@ -11,6 +11,7 @@ import { BuilderToolbar } from './BuilderToolbar';
 import { ComponentPalette } from './ComponentPalette';
 import { BuilderCanvas } from './BuilderCanvas';
 import { BuilderRightPanel } from './BuilderRightPanel';
+import { ExportDialog } from './ExportDialog';
 
 interface BuilderLayoutProps {
   pageId: string;
@@ -19,7 +20,7 @@ interface BuilderLayoutProps {
 }
 
 export function BuilderLayout({ pageId, pagePath, initialComponents = [] }: BuilderLayoutProps) {
-  const { setPage, undo, redo, save, selectComponent } = useBuilderStore();
+  const { setPage, undo, redo, save, selectComponent, isExportDialogOpen, setExportDialogOpen } = useBuilderStore();
 
   // ========================================================================
   // Initialize Page
@@ -134,6 +135,12 @@ export function BuilderLayout({ pageId, pagePath, initialComponents = [] }: Buil
 
       {/* Keyboard Shortcuts Help (Bottom Toast) */}
       <KeyboardShortcutsHint />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+      />
     </div>
   );
 }
