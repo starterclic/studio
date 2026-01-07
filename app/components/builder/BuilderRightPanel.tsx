@@ -5,12 +5,15 @@
  * Features: Smooth transitions, Keyboard shortcuts, State persistence
  */
 
+import { useState } from 'react';
 import { useBuilderStore } from '~/lib/stores/builder.store';
 import { PropsInspector } from './PropsInspector';
 import { BuilderPreview } from './BuilderPreview';
+import { BuilderPreviewWebContainer } from './BuilderPreviewWebContainer';
 
 export function BuilderRightPanel() {
   const { activeRightPanel, setActiveRightPanel } = useBuilderStore();
+  const [previewMode, setPreviewMode] = useState<'simple' | 'webcontainer'>('webcontainer');
 
   return (
     <div className="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
@@ -71,7 +74,47 @@ export function BuilderRightPanel() {
       <div className="flex-1 overflow-hidden">
         {activeRightPanel === 'inspector' && <PropsInspector />}
         {activeRightPanel === 'preview' && (
-          <BuilderPreview className="h-full" />
+          <div className="h-full flex flex-col">
+            {/* Preview Mode Toggle */}
+            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                Preview Mode:
+              </span>
+              <div className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                <button
+                  onClick={() => setPreviewMode('simple')}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                    previewMode === 'simple'
+                      ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                  title="Simple HTML preview (fast)"
+                >
+                  Simple
+                </button>
+                <button
+                  onClick={() => setPreviewMode('webcontainer')}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                    previewMode === 'webcontainer'
+                      ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                  title="Real Astro SSR preview (WebContainer)"
+                >
+                  WebContainer
+                </button>
+              </div>
+            </div>
+
+            {/* Preview Component */}
+            <div className="flex-1 overflow-hidden">
+              {previewMode === 'simple' ? (
+                <BuilderPreview className="h-full" />
+              ) : (
+                <BuilderPreviewWebContainer className="h-full" />
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -88,7 +131,9 @@ export function BuilderRightPanel() {
           <span>
             {activeRightPanel === 'inspector'
               ? 'Configure component props and settings'
-              : 'Live preview updates automatically'}
+              : previewMode === 'simple'
+              ? 'Simple HTML preview (fast, no SSR)'
+              : 'Real Astro SSR preview with hot reload'}
           </span>
         </div>
       </div>
